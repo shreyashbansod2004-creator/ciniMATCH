@@ -293,14 +293,4 @@ if btn:
               <p class="card-title">{names[idx]}</p>
               <span class="card-tag">ML Matched</span>
             </div>
-            """, unsafe_allow_html=True)
-
-
-Also update your `requirements.txt` to this:
-
-streamlit
-pandas
-requests
-scikit-learn
-Pillow
-gdown
+             """, unsafe_allow_html=True)
