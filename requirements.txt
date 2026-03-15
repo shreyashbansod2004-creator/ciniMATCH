@@ -5,4 +5,3 @@ requests
 scikit-learn
 Pillow
 gdown
-pickle5
