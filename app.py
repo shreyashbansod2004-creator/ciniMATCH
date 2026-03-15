@@ -1,3 +1,5 @@
+import os
+import gdown
 import pandas as pd
 import streamlit as st
 import pickle
@@ -175,7 +177,6 @@ div[data-testid="stButton"] > button:hover {
   background: rgba(156,255,0,0.04);
 }
 
-/* Round top corners of st.image */
 div[data-testid="stImage"] > img {
   border-radius: 20px 20px 0 0 !important;
   display: block;
@@ -195,7 +196,6 @@ TMDB_IMG_BASE = "https://image.tmdb.org/t/p/w500"
 
 @st.cache_data(show_spinner=False)
 def fetch_poster_image(movie_id: int):
-    """Returns a PIL Image object — guaranteed to display in st.image()"""
     try:
         url  = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&language=en-US"
         resp = requests.get(url, timeout=5)
@@ -208,12 +208,24 @@ def fetch_poster_image(movie_id: int):
             return Image.open(BytesIO(img_resp.content))
     except Exception:
         pass
-    # return a plain dark placeholder image
-    placeholder = Image.new("RGB", (500, 750), color=(17, 26, 20))
-    return placeholder
+    return Image.new("RGB", (500, 750), color=(17, 26, 20))
 
+# ── LOAD DATA FROM GOOGLE DRIVE ──────────────────────────────────────────────
 @st.cache_resource
 def load_data():
+    if not os.path.exists("movie_dict.pkl"):
+        with st.spinner("Downloading movie data..."):
+            gdown.download(
+                "https://drive.google.com/uc?id=1WY-xe1lRXgHzS6G9GBZWvQALLcUky-no",
+                "movie_dict.pkl", quiet=False
+            )
+    if not os.path.exists("similarity.pkl"):
+        with st.spinner("Downloading similarity model... (this may take a minute)"):
+            gdown.download(
+                "https://drive.google.com/uc?id=1UKh6VvI8abEVYRMxaWtEUdLpmvhhws8O",
+                "similarity.pkl", quiet=False
+            )
+
     movies_dict = pickle.load(open("movie_dict.pkl", "rb"))
     movies      = pd.DataFrame(movies_dict)
     similarity  = pickle.load(open("similarity.pkl", "rb"))
@@ -282,3 +294,13 @@ if btn:
               <span class="card-tag">ML Matched</span>
             </div>
             """, unsafe_allow_html=True)
+```
+
+Also update your `requirements.txt` to this:
+```
+streamlit
+pandas
+requests
+scikit-learn
+Pillow
+gdown
